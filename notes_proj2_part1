@@ -1,0 +1,46 @@
+###########
+### 1.b ###
+###########
+
+We fit the log(OR) as a function of the time of the day, where time is divided into categories, making it a categorical variable. Below are the results.
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept)  -0.5947     0.1798  -3.308 0.000941 ***
+time1-6      -1.8032     0.3761  -4.795 1.63e-06 ***
+time6-12     -0.5919     0.2781  -2.128 0.033311 *  
+time18-24    -0.6528     0.2828  -2.308 0.021011 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+
+We exponentiate and multiply e^{beta_0 + beta_j} to get the Odds ratios (OR):
+
+  time1-6    time6-12   time18-24 
+ 0.09090909  0.30526316  0.28723404
+
+at time 1-6, the OR is at its lowest; the odds is only 9% of the default (12-18). At all other times the odds ratios are much less than the default, and we conclude that there is much more pollution durign the hours 12-18. Confidence intervals for the odds ratios are:
+
+                 2.5 %    97.5 %
+time1-6     0.07491961 0.3317052
+time6-12    0.31828273 0.9494164
+time18-24   0.29629783 0.9007075
+
+None of these intervals contains 1, so they all seem to have ODDS that are significantly different (smaller) than the default category.
+
+Next we construct confidence intervals for all probabilities. The intervals are constructed by applying transformations to the ci constructed for the logodds. The results are
+
+time  ci lo      ci up     p est
+3     0.04542299 0.1479790 0.08333333
+11    0.16764727 0.3163130 0.23387097
+15    0.27946717 0.4397176 0.35555556
+23    0.15770424 0.3058685 0.22314050
+
+We can see in the plot that the probabilities of threshold excceedence is not significantly different between times 13 and 23. The probability for exceedence at 3 in the morning is very low, as one might expect due to the low levels of traffic during this time of the day. We note also that the confidence intervals vary in width, with the narrowest belonging to the 3 o-clock prediction. This seems reasonable, as the variance of a boernulli distributed random variable is highest for p=1/2, and becomes smaller as p approaches 0 or 1. Also, the confidence intervals are not symmetrical, in particular the 3 o-clock observation stands out in this regard, with the upper part of the interval being significantly wider than the lower part. This due to us using a model which is constructed in such a way as to ensure that the bounds never lie outside of [0,1], resulting in non-symetrical ci's.
+
+We also note a limitation of our model. We implicitly assume that the probability of exceedence is the same for all timepoints that lie within the same time window. The model would of course be more realistic if we split the time variable into a greater number of time categories, but the number of categories we should use is limited by the amount of data we have; more categories results in fewer observations for each category.
+
+
+

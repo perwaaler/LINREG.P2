@@ -1,0 +1,106 @@
+###########
+### 2.a ###
+###########
+
+We plot number of cars against the number time of day. Naturally we expect the pm10 concentrations to depend on the number of cars, not on the time of day, at least not in a causal sense, so we will later make a model where we use number of cars per hour as  the (now continuous) explanatory variable. This might be a better model, as  we expect that cars the main cause of levels of pm10. 
+
+From the plot we clearly see that there is a correlation between the time of the day, and the amount of traffic on the roads. Around 6-12 and 12-18 and there is very high traffic, and after midnight and in the evening there is lower traffic, with early morning having the lowest amount of traffic on average.
+
+###########
+### 2.b ###
+###########
+
+We now make a model where we assume that log(ODDS) is a linear function of the flux of cars. There estimated parameters are:
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -2.100e+00  2.231e-01  -9.416  < 2e-16 ***
+cars         4.759e-04  9.675e-05   4.919 8.69e-07 ***
+
+We see that the beta_cars parameter is highly significant, and it is positive, signifying that the odds for exceeding the pollution threshold increases as the flux of cars increases, which expected. Exponentiating beta_cars, we get the estimate of the odds ratio (when cars is increased by 1) to be 1.0004760, with 95% ci (1.00028902, 1.0006693). The interpretation of this is that by increasing the "number of cars per hour" by 1, the odds increases by approximately 0.048%. This may sound very small, but a change in cars by one is a very small change. If we instead increase cars by 100, we get an estimated odds-ratio of (1.000476)^100 = 1.048739, i.e. the odds increases by 4.87% according to the model.
+
+
+###########
+### 2.c ###
+###########
+
+We now want to estimate the probabilities for the two cases cars=300 and cars=3000. We obtain the values 
+
+cars  ci lo      ci hi      est prob
+300   0.08737297 0.1723735  0.1237357 
+3000  0.2773189  0.4043732  0.3379287
+
+According to the model, the probability for the pollution threshold to be exceeded is about 20% higher
+for cars=3000 compared to cars=300.
+
+###########
+### 2.d ###
+###########
+
+We now fit a model where we instead predict the log(odds) as a linear function of log(cars). The summary of the model is as follows:
+
+(Intercept)  -5.4873     0.9469  -5.795 6.84e-09 ***
+log(cars)     0.5928     0.1276   4.644 3.41e-06 ***
+
+the odds ratio of beta_logcars is 1.809066, with 95% ci (1.424619, 2.354134). We also are interested to see how changing the number of cars from 1000 to 1100 influences the odds. To do this, we compute 
+{exp(beta_logcars)}^{log(1100) - log(1000)}=1.058128, indicating that this change increases the odds by about 5.8%. For our previous model (where we do not take the logarithm of cars) the corresponding number was 4.9%. Hence, in this model, the increase in probability of exceedence when number of cars is increased from 1000 to 1100 is steeper than it was the previous model. In the previous model, the increase depended only on the absolute change of the independent variable; in this model, the size of the increase is given by {exp(beta_logcars)}^{log([x1+change]/x1)}, meaning that for large x1, the ratio in the exponent is close to 0, hence the ratio will be close to 1. I.e. there will be little relative change in the odds.
+
+
+
+###########
+### 2.e ###
+###########
+
+We now use the new model to predict the probability of exceedence when the number of cars is 300 and 3000 respectively. The estimated values are 0.1085136 and 0.3227817. The corresponding 95% corresponding ci's are as follows:
+
+cars   lo          hi
+300    0.07079778   0.1628013
+3000   0.2673733    0.3836594
+
+Compare this to the values we got with the previous model: 0.1237357 and   0.3379287. For low level of traffic, the new model estimates a lower probability, and for high level of traffic, the new model estimates a slightly higher probability. This indicates that in the new model, the probability changes more rapidly for medium levels of traffic, and is less sensitive to changes in traffic for more extreme values, i.e. it goes to 0 or 1 more rapidly as trafic levels tends towards either extreme.
+
+
+###########
+### 2.f ###
+###########
+
+We now want to compare the two models against each other. First we plot a exceedence probability against number of cars using kernel smoothing which uses neighbouring datapoints in order to estimate the probability of exceedence for x number of cars. This will give us a rough estimate of how the probability depends of the traffic levels. Judging from the shape of this graph, we suspect that taking the logarithm of cars does indeed improve the model. We will use other methods to investigate more rigourously.
+
+
+
+       AIC      BIC      Deviance
+model2 515.2302 523.6594 511.23
+model3 513.9942 522.4234 509.99
+
+From the table we see that model3 has lower AIC and slightly lower BIC, So by this measure of goodness, model3 is better. Also model 3 has lower deviance, implying that the data is more likely under model 3 than under model 2.
+
+###########
+### 2.g ###
+###########
+
+When we plot the predicted line vs the kernel smoother, we see that model3 seems better at capturing the shape of the graph; in particular, model2 seems to preform poorly for more extreme amounts of traffic, where it seems to overestimate the probability. Model3 performs better in this regard, but seems to perform less good for very small levels of traffic, especially as traffic levels tends to zero. This could however be due to a poor estimate of the probability in this region, perhaps it is only artifact of the smoothening of the graph. 
+
+We should be careful not to overanalyze these plots, since the kernel only gives a rough estimate of what the actual relationship looks like, and using a large bandwidth (2000 in our case) for increased smoothness and ease of interpretation also leads to increased biasedness, since it then uses very "distant" data points in order to make estimates for each x-value. In order to avoid making a biased interpretation, we experimented with many different bandwidths, to see how sensitive our interpretation was to choice of bandwidth. The above conclusions where the ones which seemed fairly consistent across a wide range of bandwidths.
+
+###########
+### 2.h ###
+###########
+
+We now use model3 to decide which level of trafic should not be exceeded in order to keep the probability of pollution below 10%. Solving for x in the equation of the model, we obtain the result that the trafic flow chould be kept below 257.2177 cars per hour.
+
+###########
+### 2.i ###
+###########
+
+From the plot of cooks distance we find that observation 373 in particular has a relatively large influence on the estimates. It turns out that in this observation the traffic level is 74, yet the pollution threshold is exceeded, which is unusual for such a low level of traffic.
+A similar conclusion can be made about obs. 148, 204, 250, 297, 339, 373, 424, 476, which all exceed the pollution threshold despite low levels of traffic (below 208). These observations lie in a region where the slope of the probability curve is particularly steep, giving them large leverage. 
+
+These outliers did share an interesting characteristic, they all had relatively low windspeed(except for 148, which was about average) as can be seen in the plot. This suggests a possible explenation for the outliers: the threshold was exceeded despite low traffic levels due to the stillness of the wind those days, i.e. low levels of wind means that the particles accumulate more. A  natural step to improve the model then is to include windspeed as an explanatory variable, which will be done in the next part of the project.
+
+
+
+
+
+
+
+

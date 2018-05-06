@@ -1,0 +1,67 @@
+###########
+### 3.a ###
+###########
+
+We now include time as an explanatory variable to see if this might improve the model. To see decide on which model is better, we will use BIC and AIC. The results are
+
+
+
+        AIC       BIC
+model3  513.9942  522.4234
+model4  516.0029  537.0759
+
+Both BIC and AIC are smaller for model4, in particular BIC is significantly better for model3, hence we conclude that adding time as an explanatory variable did not improve the model. The reason for this is likely due to the fact that traffic - not time -  is causing the change in pollution level. Time and exceedence of threshold are related, but this is probably only because traffic levels are related to the time of the day. Therefore, the time variable doesn't bring much new information that hasn't already been included by traffic levels, i.e. it is too redundant to be worth including. It makes sense therefore that BIC increases more than AIC, since BIC punishes more heavily the inclusion of unnescesary variables.
+
+###########
+### 3.b ###
+###########
+
+We now experiment with all the available variables in order to try to find the best model. We will investigate only the models that do not include traffic levels, as this variable for obvious reasons will be valuable to have in the model. To keep the number of possible models down will first only focus on models that do not include time.
+
+Looking at the plot of BIC/AIC for all models, we see that there are 2 candidates for best model: model m13(log(cars)+windspeed) and m123(log(cars)+temp2m+windspeed). AIC for these two models is 506.6780 and 506.2378, and BIC is 519.3218 and 523.0963 respectively. They are approximately equally good as measured by AIC, but m13 is slightly better according to BIC. We therefore prefer m13. It is still possible that temperature is related to pollution levels, but the results suggests that it is a relatively weak effect, and that we might need more data before it becomes beneficial to include as an explanatory variable.
+
+The summary of the two models are as follows:
+
+m13:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -5.15028    0.97834  -5.264 1.41e-07 ***
+log(cars)    0.62966    0.13435   4.687 2.78e-06 ***
+temp2m       0.02824    0.01820   1.552  0.12077    
+windspeed   -0.20515    0.06486  -3.163  0.00156 ** 
+
+    Null deviance: 536.85  on 499  degrees of freedom
+Residual deviance: 498.24  on 496  degrees of freedom
+AIC: 506.24
+
+
+m123:
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -5.43900    0.96451  -5.639 1.71e-08 ***
+log(cars)    0.66671    0.13256   5.029 4.92e-07 ***
+windspeed   -0.18679    0.06348  -2.942  0.00326 ** 
+
+    Null deviance: 536.85  on 499  degrees of freedom
+Residual deviance: 500.68  on 497  degrees of freedom
+AIC: 506.68
+
+As we see in the summary, the z value of temp2m does not lie in the critical region, so we cannot reject the hypothesis that its coefficient is zero. THe z-value is however not much larger than the 0.005 threshold, so it could still be significant; it might be that the other variables are so much "stronger" in terms of explaining the pollution that the effect of temperature gets drowned out.
+
+When we make a model using only temp2m, we get the following results:
+
+            Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -1.26496    0.11057 -11.441   <2e-16 ***
+temp2m       0.03777    0.01705   2.215   0.0268 *  
+
+    Null deviance: 536.85  on 499  degrees of freedom
+Residual deviance: 531.85  on 498  degrees of freedom
+AIC: 535.85
+
+Here, Beta2 is significantly different from zero on a 0.05 level. Accoring to this model, increasing the temperature increases the probability of exceeding pollution. Plotting cars against temp2m, we see that there might be a linear relationship. To investigate this potential relationship, we make linear fit with cars as a function of temp2m. The results are as follows:
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 1645.652     50.224  32.766   <2e-16 ***
+temp2m        47.739      7.812   6.111    2e-09 ***
+
+
+We see that the beta_temp coefficient is highly significant. he coefficient is positive, meaning that traffic tends to increase with temperature. This might be because more people want to be outside on days when the weather is sunny. The fact that these two variables covary motivates the choice to drop temperature (the least powerful of the two) from the model.
